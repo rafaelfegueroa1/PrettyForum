@@ -4,26 +4,39 @@
  *
  */
 
-$iniInfo = parse_ini_file('settings.ini', true);
+try
+{
+    $iniInfo = parse_ini_file('settings.ini', true);
+}
+catch (Exception $e)
+{
+    throw new Exception('Could not open settings.ini');
+}
+
 
 return array(
 
     'database' => array(
         'host' => $iniInfo['database']['host'],
         'username' => $iniInfo['database']['username'],
-        'password' => $iniInfo['database']['password']
+        'password' => $iniInfo['database']['password'],
     ),
 
     'email' => array(
         'from' => $iniInfo['email']['from'],
-        'name' => $iniInfo['email']['name']
+        'name' => $iniInfo['email']['name'],
     ),
 
+    'appSettings' => array(
+        'defaultTitle' => $iniInfo['appSettings']['defaultTitle'],
+        'forumName' => $iniInfo['appSettings']['forumName'],
+    ),
 
     'setup' => array(
         'status' => $iniInfo['setup']['status'],
-        'date' => $iniInfo['setup']['date']
-    )
+        'date' => $iniInfo['setup']['date'],
+        'uninstallKey' => $iniInfo['setup']['uninstallKey'],
+    ),
 
 
 );

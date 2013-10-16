@@ -12,7 +12,7 @@ class UserController extends BaseController {
     // Instantiate the UserController and add the necessary filters
     public function __construct()
     {
-        $this->beforeFilter('auth', array('except' => array('index', 'login', 'register')));
+        $this->beforeFilter('auth', array('except' => array('getIndex', 'getLogin', 'getRegister')));
     }
 
 

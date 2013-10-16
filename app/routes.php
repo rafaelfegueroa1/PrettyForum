@@ -11,7 +11,7 @@
 |
 */
 
-Route::controller('install', 'InstallController');
+Route::controller('setup', 'SetupController');
 Route::controller('user', 'UserController');
 
 
