@@ -18,6 +18,7 @@ Route::controller('user', 'UserController');
 
 Route::get('/', function()
 {
-	return View::make('forum.home');
+	return View::make('layouts.forum.home')
+        ->with('sections', Section::all());
 });
 

@@ -10,8 +10,9 @@ class Helper {
 
     const SETTINGSFILE = '../app/config/settings.ini';
     const LAYOUTFOLDER = '../app/views/layouts/';
-    const DEFAULTFOLDER = '../app/views/default/';
-    const VIEWSFOLDER = '../app/views/';
+    const VIEWSFOLDER = '../app/views/layouts';
+    const TEMPLATESFOLDER = '../app/templates/';
+    const PUBLICFOLDER = '../public';
 
     // Function to write an ini file
     public static function writeIni($fileName, $iniArray)
@@ -66,21 +67,40 @@ class Helper {
         return $content;
     }
 
-    // Helper to remove files in a dir, works recursively
-    public static function removeFilesFromFolder($dir) {
-        $files = glob( $dir . '*', GLOB_MARK );
 
-        foreach( $files as $file ){
-            if( substr( $file, -1 ) == '/' )
-                self::removeFilesFromFolder( $file );
-            else
-                unlink( $file );
+    public static function deleteFolderAndContents($dir)
+    {
+        $it = new RecursiveDirectoryIterator($dir);
+        $files = new RecursiveIteratorIterator($it,
+            RecursiveIteratorIterator::CHILD_FIRST);
+        foreach($files as $file) {
+            if ($file->getFilename() === '.' || $file->getFilename() === '..') {
+                continue;
+            }
+            if ($file->isDir()){
+                rmdir($file->getRealPath());
+            } else {
+                unlink($file->getRealPath());
+            }
         }
-
     }
 
-
-
+    // Helper to copy a folder's contents to destination
+    public static function copyFilesRecursively($src, $dst) {
+        $dir = opendir($src);
+        while(false !== ( $file = readdir($dir)) ) {
+            if (( $file != '.' ) && ( $file != '..' )) {
+                if ( is_dir($src . '/' . $file) ) {
+                    mkdir($dst . '/' . $file);
+                    self::copyFilesRecursively($src . '/' . $file, $dst . '/' . $file);
+                }
+                else {
+                    copy($src . '/' . $file,$dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
+    }
 
 
 
@@ -92,8 +112,15 @@ class Helper {
     // All built with Laravel's Schema builder
     public static function createInstallTables()
     {
-        // Create users table
+
+        // Drop tables if they are already installed, drop them in this order to make sure no foreign key constraints errors will be triggered
+        Schema::dropIfExists('forum_replies');
+        Schema::dropIfExists('forum_topics');
+        Schema::dropIfExists('forum_categories');
+        Schema::dropIfExists('forum_sections');
         Schema::dropIfExists('users');
+
+        // Create users table
         Schema::create('users', function($table)
         {
             $table->increments('id');
@@ -106,7 +133,6 @@ class Helper {
         });
 
         // Create sections table (used to order forum, e.g. general chat/ gaming/ programming/
-        Schema::dropIfExists('forum_sections');
         Schema::create('forum_sections', function($table)
         {
             $table->increments('id');
@@ -116,7 +142,6 @@ class Helper {
         });
 
         // Create categories, AKA forums
-        Schema::dropIfExists('forum_categories');
         Schema::create('forum_categories', function($table)
         {
             $table->increments('id');
@@ -132,7 +157,6 @@ class Helper {
         });
 
         // Create table for topics
-        Schema::dropIfExists('forum_topics');
         Schema::create('forum_topics', function($table)
         {
             $table->increments('id');
@@ -154,7 +178,6 @@ class Helper {
         });
 
         // Create table for replies
-        Schema::dropIfExists('forum_replies');
         Schema::create('forum_replies', function($table)
         {
             $table->increments('id');
@@ -162,11 +185,15 @@ class Helper {
             $table->integer('topic_id')->unsigned();
             $table->foreign('topic_id')->references('id')->on('forum_topics')
                 ->onUpdate('cascade')
-                ->onDelete('cascade');;
+                ->onDelete('cascade');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users')
                 ->onUpdate('cascade')
-                ->onDelete('cascade');;
+                ->onDelete('cascade');
+            $table->integer('category_id')->unsigned();
+            $table->foreign('category_id')->references('id')->on('forum_categories')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->boolean('deleted')->default(0);
 
             $table->timestamps();

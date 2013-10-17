@@ -45,7 +45,7 @@ class SetupController extends BaseController {
         $input = Input::get();
 
         // Create an array we will write to an ini
-        $databaseInfo = array(
+        $info = array(
             'database' => array(
                 'host' => $input['databaseHost'],
                 'username' => $input['databaseUsername'],
@@ -68,7 +68,7 @@ class SetupController extends BaseController {
             )
         );
         // Write said ini
-        Helper::writeIni(Helper::SETTINGSFILE, $databaseInfo);
+        Helper::writeIni(Helper::SETTINGSFILE, $info);
 
         // Create a new PDO object to test the credentials and then create the database
         $db = new PDO('mysql:host='.$input['databaseHost'], $input['databaseUsername'], $input['databasePassword']);
@@ -79,19 +79,44 @@ class SetupController extends BaseController {
         Config::set('database.connections.mysql.username', $input['databaseUsername']);
         Config::set('database.connections.mysql.password', $input['databasePassword']);
 
-        // Write default layout to views folder
-        file_put_contents(Helper::VIEWSFOLDER.'layout.blade.php', file_get_contents(Helper::DEFAULTFOLDER.'defaultLayout.blade.php'));
+        // Copy default views to views/views folder
+        Helper::copyFilesRecursively(Helper::TEMPLATESFOLDER.'/layouts/default', Helper::VIEWSFOLDER);
+        // Copy default assets to public/assets
+        Helper::copyFilesRecursively(Helper::TEMPLATESFOLDER.'/assets/default', Helper::PUBLICFOLDER.'/assets');
+
 
         // Create all necessary tables
         Helper::createInstallTables();
 
+        $section = new Section;
+        $section->title = 'General';
+        $section->save();
 
+        $category = new Category;
+        $category->title = 'Lounge';
+        $category->description = 'Just talk about whatever is on your mind...';
+        $category->parent_section = 1;
+        $category->save();
 
+        $user = new User;
+        $user->username = 'Admin';
+        $user->password = 'test';
+        $user->email = 'Admin@admin.com';
+        $user->save();
 
+        $topic = new Topic;
+        $topic->title = 'Welcome!';
+        $topic->body = 'Welcome to your forum!';
+        $topic->user_id = $user->id;
+        $topic->category_id = $category->id;
+        $topic->save();
 
-
-
-
+        $reply = new Reply;
+        $reply->body = 'This is a test reply';
+        $reply->topic_id = $topic->id;
+        $reply->user_id = $user->id;
+        $reply->category_id = $category->id;
+        $reply->save();
 
         return View::make('install.installSuccess');
     }
@@ -113,14 +138,14 @@ class SetupController extends BaseController {
         return View::make('install.uninstall')->with('installed', $installed);
     }
 
-    // Uninstall PrettyForum (removes settings only)
+    // Uninstall PrettyForum
     public function postUninstall()
     {
+
         if(file_exists(Helper::SETTINGSFILE))
         {
             // Read settings
             $settings = parse_ini_file(Helper::SETTINGSFILE, true);
-            // Check if install is already done, if true, return a 404 not found.
             if(!isset($settings['setup']['uninstallKey']))
             {
                 return Redirect::action('SetupController@getUninstall');
@@ -134,15 +159,16 @@ class SetupController extends BaseController {
             Session::flash('wrongUninstallKey', 1);
             return Redirect::action('SetupController@getUninstall');
         }
+
         // Remove settings file
         unlink(Helper::SETTINGSFILE);
-        // Remove chosen layout from views
-        unlink(Helper::VIEWSFOLDER.'layout.blade.php');
-        Helper::removeFilesFromFolder(Helper::LAYOUTFOLDER);
+
+        // Remove all views from the views/views folder
+        Helper::deleteFolderAndContents(Helper::VIEWSFOLDER);
+        Helper::deleteFolderAndContents(Helper::PUBLICFOLDER.'/assets');
 
 
         return View::make('install.uninstallSuccess');
-
 
     }
 
