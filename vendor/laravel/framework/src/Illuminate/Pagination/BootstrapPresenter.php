@@ -167,7 +167,7 @@ class BootstrapPresenter {
 	 * @param  string  $text
 	 * @return string
 	 */
-	public function getPrevious($text = '&laquo;')
+	public function getPrevious($text = 'Previous')
 	{
 		// If the current page is less than or equal to one, it means we can't go any
 		// further back in the pages, so we will render a disabled previous button
@@ -190,7 +190,7 @@ class BootstrapPresenter {
 	 * @param  string  $text
 	 * @return string
 	 */
-	public function getNext($text = '&raquo;')
+	public function getNext($text = 'Next')
 	{
 		// If the current page is greater than or equal to the last page, it means we
 		// can't go any further into the pages, as we're already on this last page

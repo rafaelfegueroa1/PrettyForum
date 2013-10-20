@@ -16,9 +16,12 @@ Route::controller('user', 'UserController');
 
 
 
+Route::controller('forum', 'ForumController');
+Route::controller('topic', 'TopicController');
+
+
 Route::get('/', function()
 {
-	return View::make('layouts.forum.home')
-        ->with('sections', Section::all());
+	return View::make('layouts.forum.home');
 });
 

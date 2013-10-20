@@ -20,15 +20,30 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	protected $hidden = array('password');
 
 
-    public function getTopics()
+    public function topics()
     {
         return $this->hasMany('Topic', 'user_id');
     }
 
-    public function getReplies()
+    public function replies()
     {
         return $this->hasMany('Reply', 'user_id');
     }
+
+
+    // Return user's postcount
+    public function getPostCount()
+    {
+        return $this->topics()->count() + $this->replies()->count();
+    }
+
+    // Check if user can modify this post
+    public function canModifyPost($post)
+    {
+        // ToDo: Write function to check if user can modify post
+        // Check for certain groups user belongs to, is admin, is mod etc
+    }
+
 
 	/**
 	 * Get the unique identifier for the user.

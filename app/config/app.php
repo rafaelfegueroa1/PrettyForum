@@ -39,7 +39,7 @@ return array(
 	|
 	*/
 
-	'timezone' => 'UTC',
+	'timezone' => (file_exists('settings.ini')['appSettings']['forumTimezone']) ? parse_ini_file('settings.ini', true)['appSettings']['forumTimezone'] : 'Europe/Amsterdam',
 
 	/*
 	|--------------------------------------------------------------------------

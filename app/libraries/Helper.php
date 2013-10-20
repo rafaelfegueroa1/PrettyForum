@@ -103,10 +103,39 @@ class Helper {
     }
 
 
+    // Shorten given string to $maxLength
+    public static function shorten($string, $maxLength = 25)
+    {
+        if(strlen($string) >= $maxLength)
+        {
+            $string  = substr($string, 0, $maxLength);
+        }
+        return $string;
+    }
+
+
+
+    // Forum helper
+    public static function getDateFormatted($date)
+    {
+        if(date('Ymd') == date('Ymd', strtotime($date)))
+        {
+            return '<span title="'.date('j-n-Y', strtotime($date)).'">today</span> at '. date('H:i', strtotime($date));
+        }
+        if(date('Ymd', strtotime('yesterday')) == date('Ymd', strtotime($date)))
+        {
+            return '<span title="'.date('j-n-Y', strtotime($date)).'">yesterday</span> at '. date('H:i', strtotime($date));
+        }
+
+        return 'at '. date('H:i / j-n-Y', strtotime($date));
+    }
+
+
+
+
 
 
     // Install helper section
-
 
     // Create all tables necessary for PrettyForum to run
     // All built with Laravel's Schema builder
@@ -127,7 +156,10 @@ class Helper {
             $table->string('username')->unique();
             $table->string('password');
             $table->string('email')->unique();
-
+            $table->string('ip_address');
+            $table->string('avatar')->default('');
+            $table->string('user_title')->default('');
+            $table->text('signature')->default('');
             $table->timestamps();
 
         });
@@ -156,6 +188,8 @@ class Helper {
             $table->timestamps();
         });
 
+
+        // TODO: Add edited_by on forum_replies / forum_topics
         // Create table for topics
         Schema::create('forum_topics', function($table)
         {
@@ -191,13 +225,52 @@ class Helper {
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->integer('category_id')->unsigned();
-            $table->foreign('category_id')->references('id')->on('forum_categories')
+            $table->foreign('category_id')->references('category_id')->on('forum_topics')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->boolean('deleted')->default(0);
 
             $table->timestamps();
         });
+    }
+
+    // Fill the created tables with the input from the installer page
+    public static function fillInstallTables($input)
+    {
+        $section = new Section;
+        $section->title = 'General';
+        $section->save();
+
+        $category = new Category;
+        $category->title = 'Lounge';
+        $category->description = 'Just talk about whatever is on your mind...';
+        $category->parent_section = $section->id;
+        $category->save();
+
+        $user = new User;
+        $user->username = $input['adminUsername'];
+        $user->password = Hash::make($input['adminPassword']);
+        $user->email = $input['adminEmail'];
+        $user->ip_address = $_SERVER['REMOTE_ADDR'];
+        $user->avatar = '/assets/img/avatar/standard.png';
+        $user->user_title = 'I be like what..';
+        $user->signature = 'Baas boven baas';
+        $user->save();
+
+        $topic = new Topic;
+        $topic->title = 'Welcome!';
+        $topic->body = 'Welcome to [b]your[/b] forum!';
+        $topic->user_id = $user->id;
+        $topic->category_id = $category->id;
+        $topic->save();
+
+        $reply = new Reply;
+        $reply->body = 'This is a test reply';
+        $reply->topic_id = $topic->id;
+        $reply->user_id = $user->id;
+        $reply->category_id = $category->id;
+        $reply->save();
+
     }
 }
 

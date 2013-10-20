@@ -3,47 +3,88 @@
 
 @section('content')
 
+<ul class="breadcrumb">
+    <li><a class="forum-link" href="/">{{{ Config::get('settings.appSettings.forumName') }}}</a></li>
+</ul>
 
-@foreach($sections as $section)
+@foreach(Section::with('categories.topics', 'categories.replies')->get() as $section)
 
-    <div class="row section-container">
-        <div class="col-md-12">
-            <div class="row">
-                <div class="col-md-6 section-title">
-                    {{{ $section->title }}}
-                </div>
-                <div class="col-md-2 section-info">Topics</div>
-                <div class="col-md-2 section-info">Posts</div>
-                <div class="col-md-2 section-info">Latest post</div>
+<table class="table-container" id="{{{ $section->id }}}">
+
+    <thead class="table-head">
+        <tr>
+            <th class="table-head-title col-md-6">
+                {{{ $section->title }}}
+            </th>
+            <th class="table-head-info col-md-1">Topics</th>
+            <th class="table-head-info col-md-1">Posts</th>
+            <th class="table-head-info col-md-4">Latest post</th>
+        </tr>
+
+
+    </thead>
+
+    <tbody>
+    @foreach($section->categories as $category)
+    <tr class="table-body-container">
+
+
+        <td class="col-md-6">
+            <p class="category-title"><a class="forum-link" href="/forum/show/{{{ $category->id }}}"> {{{ $category->title }}} </a></p>
+            <p class='category-description'>{{{ $category->description }}}</p>
+        </td>
+        <td class="category-info col-md-1">
+            {{{ $topicCount = count($category->topics) }}}
+        </td>
+        <td class="category-info col-md-1">
+            {{{ $topicCount + count($category->replies) }}}
+        </td>
+        <td class="category-info col-md-4">
+
+            {{-- Check if category has topics/replies --}}
+            @if( count($category->replies) == 0)
+
+                {{-- If category has no active topics with replies check for topics --}}
+                @if( count($category->topics) == 0)
+                    {{-- No topics found, show "none" --}}
+                    None
+                @else
+                    {{-- Topic found, echo it's info --}}
+                    <?php
+                    $topic = $category->topics()->orderBy('id', 'DESC')->first();
+                    $user = $topic->user;
+                    ?>
+
+                    <a class="forum-link" href="/topic/show/{{{ $topic->id }}}"> {{{ Helper::shorten($topic->title, 25) }}} </a>
+                    by <a class="forum-link" href="/user/profile/{{{ $user->id }}}">{{{ Helper::shorten($user->username, 25) }}}</a>
+                @endif
+
+
+            @else
+            {{-- Active topic found, echo it's info --}}
+            <?php   $reply = $category->replies()->orderBy('id', 'DESC')->first();
+            $topic = $reply->topic()->first();
+            $user = $reply->user;
+            ?>
+
+               <a class="forum-link" href="/topic/show/{{{ $topic->id }}}"> {{{ Helper::shorten($topic->title, 25) }}} </a>
+               by <a class="forum-link" href="/user/profile/{{{ $user->id }}}">{{{ Helper::shorten($user->username, 25) }}}</a>
+
+            @endif
+
+
+            <div>
+
             </div>
-            <div class="category-container">
-                @foreach($section->getCategories()->get() as $category)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <span class="category-title">{{{ $category->title }}}</span>
-                            <br/>
-                            <span class='category-description'>{{{ $category->description }}}</span>
-                        </div>
-                        <div class="col-md-2 category-info">
-                            {{{ $topicCount = $category->getTopics()->count() }}}
-                        </div>
-                        <div class="col-md-2 category-info">
-                            {{{ $topicCount + $category->getReplies()->count() }}}
-                        </div>
-                        <div class="col-md-2 category-info">
-                            <?php
-                                $topic = $category->getReplies()->first()->getTopic()->first();
-                            ?>
-                            <a href="/topic/{{{$topic->id}}}">{{{ $topic->title }}} </a> by {{{ $topic->getUser()->first()->username }}}
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
+        </td>
+
+    </tr>
+
+    @endforeach
+    </tbody>
+</table>
+
 @endforeach
-@endsection
-
-
 
 @endsection
+

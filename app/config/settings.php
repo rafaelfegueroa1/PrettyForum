@@ -6,14 +6,15 @@
 
 try
 {
-    $iniInfo = parse_ini_file('settings.ini', true);
+    //$iniInfo =
+    return parse_ini_file('settings.ini', true);
 }
 catch (Exception $e)
 {
     throw new Exception('Could not open settings.ini');
 }
 
-
+/*
 return array(
 
     'database' => array(
@@ -30,6 +31,7 @@ return array(
     'appSettings' => array(
         'defaultTitle' => $iniInfo['appSettings']['defaultTitle'],
         'forumName' => $iniInfo['appSettings']['forumName'],
+        'forumTimezone' => $iniInfo['appSettings']['forumTimezone']
     ),
 
     'setup' => array(
@@ -40,4 +42,4 @@ return array(
 
 
 );
-
+*/

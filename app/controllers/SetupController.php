@@ -59,12 +59,14 @@ class SetupController extends BaseController {
             'appSettings' => array(
                 'defaultTitle' => $input['defaultTitle'],
                 'forumName' => $input['forumName'],
+                'forumTimezone' => $input['forumTimezone'],
             ),
 
             'setup' => array(
                 'status' => 'complete',
                 'date' => date('d-m-Y H:i'),
                 'uninstallKey' => $input['uninstallKey'],
+
             )
         );
         // Write said ini
@@ -87,36 +89,11 @@ class SetupController extends BaseController {
 
         // Create all necessary tables
         Helper::createInstallTables();
+        // Fill the created tables
+        Helper::fillInstallTables($input);
 
-        $section = new Section;
-        $section->title = 'General';
-        $section->save();
-
-        $category = new Category;
-        $category->title = 'Lounge';
-        $category->description = 'Just talk about whatever is on your mind...';
-        $category->parent_section = 1;
-        $category->save();
-
-        $user = new User;
-        $user->username = 'Admin';
-        $user->password = 'test';
-        $user->email = 'Admin@admin.com';
-        $user->save();
-
-        $topic = new Topic;
-        $topic->title = 'Welcome!';
-        $topic->body = 'Welcome to your forum!';
-        $topic->user_id = $user->id;
-        $topic->category_id = $category->id;
-        $topic->save();
-
-        $reply = new Reply;
-        $reply->body = 'This is a test reply';
-        $reply->topic_id = $topic->id;
-        $reply->user_id = $user->id;
-        $reply->category_id = $category->id;
-        $reply->save();
+        // Log in with provided account credentials
+        Auth::attempt(array('username' => $input['adminUsername'], 'password' => $input['adminPassword']));
 
         return View::make('install.installSuccess');
     }

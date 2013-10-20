@@ -11,18 +11,18 @@ class Topic extends Eloquent {
     protected $table = 'forum_topics';
 
     // Get category topics belongs to
-    public function getCategory()
+    public function category()
     {
         return $this->belongsTo('Category', 'category_id');
     }
 
     // Get replies this topic has
-    public function getReplies()
+    public function replies()
     {
         return $this->hasMany('Reply', 'topic_id');
     }
 
-    public function getUser()
+    public function user()
     {
         return $this->belongsTo('User', 'user_id');
     }

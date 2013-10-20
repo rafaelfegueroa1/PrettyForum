@@ -3,7 +3,7 @@
 
 @section('content')
 
-{{ Form::open() }}
+{{ Form::open(array('id' => 'installForm')) }}
 
 <h2>PrettyForum setup</h2>
 Server time: {{ date('d-m-Y / H:i') }}
@@ -40,6 +40,29 @@ Server time: {{ date('d-m-Y / H:i') }}
 {{ Form::label('forumName', 'Forum name:') }}
 {{ Form::text('forumName', '', array('class'=>'form-control')) }}
 
+{{ Form::label('forumTimezone', 'Forum timezone') }}
+{{ Form::text('forumTimezone', 'Europe/Amsterdam', array('class'=>'form-control')) }}
+<br/>
+<p class="alert alert-info">
+    Don't know your timezone? Find it at <a href="http://php.net/manual/en/timezones.php" target="_blank">PHP.net</a>
+</p>
+<br/>
+<legend>Admin account</legend>
+{{ Form::label('adminUsername', 'Admin username:') }}
+{{ Form::text('adminUsername', '', array('class'=>'form-control')) }}
+
+{{ Form::label('adminPassword', 'Admin password:') }}
+{{ Form::password('adminPassword', array('class'=>'form-control')) }}
+
+<p class="alert alert-danger" id="passwordError" style="margin-top:10px;">
+   Passwords do not match.
+</p>
+{{ Form::label('adminPasswordConfirm', 'Confirm password:') }}
+{{ Form::password('adminPasswordConfirm', array('class'=>'form-control')) }}
+
+{{ Form::label('adminEmail', 'Admin email:') }}
+{{ Form::email('adminEmail', '', array('class'=>'form-control')) }}
+
 
 <br/>
 <legend>Security</legend>
@@ -50,7 +73,24 @@ Server time: {{ date('d-m-Y / H:i') }}
 <p class="alert alert-info">
     Please save your uninstall key somewhere safe!
 </p>
-{{ Form::submit('Install PrettyForum', array('class'=> 'btn btn-primary')) }}
+{{ Form::button('Install PrettyForum', array('class'=> 'btn btn-primary', 'id' => 'installBtn')) }}
+
+<script>
+    $(document).ready( function()
+    {
+       $('#passwordError').hide();
+       $('#installBtn').click( function()
+       {
+           $('#passwordError').hide();
+           if($('#adminPassword').val() != $('#adminPasswordConfirm').val())
+           {
+               $('#passwordError').show();
+               return;
+           }
+           $('#installForm').submit();
+       });
+    });
+</script>
 
 
 
