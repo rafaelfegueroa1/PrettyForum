@@ -11,7 +11,12 @@
     <link type="text/css" href="//netdna.bootstrapcdn.com/bootswatch/3.0.0/flatly/bootstrap.min.css" rel="stylesheet">
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
+    <link rel="stylesheet" href="/assets/css/jquery.bbcode.css">
+    <script src="/assets/js/jquery.bbcode.js"></script>
+
+
+
 
     {{-- This is a Laravel Blade comment, text between these parts will be left out of the HTML output! --}}
     {{-- Yield the title from the view or if it isn't set, use the default title given at install --}}
@@ -53,9 +58,15 @@
                 <div class="col-md-10 col-md-offset-1">
                     <div class="pull-left">
                     @if(Auth::guest())
-                        Hi guest
-                    @else
-                        Hi {{{ Auth::user()->username }}}
+                        Hi guest,
+                        {{ link_to_action('UserController@getLogin', ' login ', '', array('class' => 'user-cp-link')) }}
+                        or
+                        {{ link_to_action('UserController@getRegister', ' register', '', array('class' => 'user-cp-link')) }}
+
+                        @else
+                        Hi {{{ Auth::user()->username }}},
+                        {{ link_to_action('UserController@getLogout', 'logout', array('_token' => csrf_token()), array('class' => 'user-cp-link')) }}
+                        <?php // TODO: USER-CP link ?>
                     @endif
                     </div>
                     <div class="text-right pull-right">

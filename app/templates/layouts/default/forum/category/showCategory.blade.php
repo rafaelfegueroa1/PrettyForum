@@ -51,7 +51,7 @@
         </td>
 
         <td class="category-info col-md-2">
-            {{{ count($topic->replies) }}}
+            {{{ $topic->replies()->where('deleted', '=', '0')->count() }}}
         </td>
         <td class="category-info col-md-4">
 
@@ -62,7 +62,7 @@
 
             @else
             {{-- Replies found, echo it's info --}}
-            <?php   $reply = $topic->replies()->orderBy('id', 'DESC')->first();
+            <?php   $reply = $topic->replies()->where('deleted', '=', '0')->orderBy('id', 'DESC')->first();
             $user = $reply->user;
             ?>
 

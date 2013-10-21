@@ -232,6 +232,9 @@ class Helper {
 
             $table->timestamps();
         });
+
+        // Todo: create table to track user logins + their IPs
+
     }
 
     // Fill the created tables with the input from the installer page
@@ -251,7 +254,7 @@ class Helper {
         $user->username = $input['adminUsername'];
         $user->password = Hash::make($input['adminPassword']);
         $user->email = $input['adminEmail'];
-        $user->ip_address = $_SERVER['REMOTE_ADDR'];
+        $user->ip_address = Request::server('REMOTE_ADDR');
         $user->avatar = '/assets/img/avatar/standard.png';
         $user->user_title = 'I be like what..';
         $user->signature = 'Baas boven baas';
@@ -265,7 +268,7 @@ class Helper {
         $topic->save();
 
         $reply = new Reply;
-        $reply->body = 'This is a test reply';
+        $reply->body = '[quote='.$user->username.']This is a test reply[/quote]';
         $reply->topic_id = $topic->id;
         $reply->user_id = $user->id;
         $reply->category_id = $category->id;

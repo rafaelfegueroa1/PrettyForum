@@ -25,7 +25,8 @@ Make sure that any assets you use are linked to by domain.com/assets/*asset*
 
 
 
-
+Thanks to:
+* Kaimallea for his BBCode parser - https://github.com/kaimallea/php-bbcode
 
 
 

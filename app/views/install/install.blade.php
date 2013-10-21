@@ -17,7 +17,7 @@ Server time: {{ date('d-m-Y / H:i') }}
 {{ Form::text('databaseUsername', '', array('class'=>'form-control')) }}
 
 {{ Form::label('databasePassword', 'Database password:') }}
-{{ Form::text('databasePassword', '', array('class'=>'form-control')) }}
+{{ Form::password('databasePassword', '', array('class'=>'form-control')) }}
 
 <br/>
 <p class="alert alert-info">
