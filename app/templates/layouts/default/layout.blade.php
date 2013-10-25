@@ -3,15 +3,17 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    {{-- jQuery, loaded from google's APIs --}}
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-    {{-- <link rel="stylesheet" type="text/css" href="//normalize-css.googlecode.com/svn/trunk/normalize.css"/> --}}
 
-
+    {{-- Bootstrap 3 theme --}}
     <link type="text/css" href="//netdna.bootstrapcdn.com/bootswatch/3.0.0/flatly/bootstrap.min.css" rel="stylesheet">
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
+
+    {{-- jQuery and CSS for BBCode plugin --}}
     <link rel="stylesheet" href="/assets/css/jquery.bbcode.css">
     <script src="/assets/js/jquery.bbcode.js"></script>
 

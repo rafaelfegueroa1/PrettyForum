@@ -1,6 +1,12 @@
 @extends('layouts.layout')
 
 
+
+@section('title')
+{{{ $topic->title }}} - {{{ Config::get('settings.appSettings.defaultTitle') }}}
+@endsection
+
+
 @section('script')
 
 <script>
@@ -9,7 +15,7 @@
 
         $('.quoteBtn').click( function()
         {
-            $.get('{{{ action("TopicController@getReplyText") }}}/'+$(this).data('reply-id'), function(data)
+            $.get('{{{ action("ReplyController@getReplyText") }}}/'+$(this).data('reply-id'), function(data)
             {
                 var reply = JSON.parse(data);
                 $('#replyArea').append('[quote='+reply.username+']'+reply.body+'[/quote]');
@@ -21,18 +27,18 @@
 @endsection
 
 @section('content')
-<?php $bbcode = new Bbcode; ?>
+
 
 <ul class="breadcrumb">
     <li><a class="forum-link" href="/">{{{ Config::get('settings.appSettings.forumName') }}}</a></li>
     <li><a class="forum-link" href="/#{{{ $topic->category->parent_section }}}">{{{ $topic->category->section->title }}}</a></li>
-    <li><a class="forum-link" href="/forum/show/{{{ $topic->category->id }}}">{{{ $topic->category->title }}}</a></li>
+    <li><a class="forum-link" href="{{{ action('ForumController@getShow', $topic->category->id) }}}">{{{ $topic->category->title }}}</a></li>
 
     {{-- Show pages breadcrumb if current page is not 1 --}}
     @if($replies->getCurrentPage() == 1)
         <li class="active">{{{ Helper::shorten($topic->title, 60) }}} </li>
     @else
-        <li><a class="forum-link" href="/topic/show/{{{ $topic->id }}}">{{{ Helper::shorten($topic->title, 60) }}}</a></li>
+        <li><a class="forum-link" href="{{{ action('TopicController@getShow', $topic->id) }}}">{{{ Helper::shorten($topic->title, 60) }}}</a></li>
         <li class="active">Page {{{ $replies->getCurrentPage() }}} of {{{ $replies->getLastPage() }}}</li>
     @endif
 
@@ -68,7 +74,7 @@
                     </div>
 
 
-                    <h5><a class="forum-link" href="/user/profile/{{{$topic->user->id}}}">{{{ $topic->user->username }}}</a></h5>
+                    <h5><a class="forum-link" href="{{{ action('UserController@getProfile', $topic->user->id) }}}">{{{ $topic->user->username }}}</a></h5>
                     <span>{{{ $topic->user->user_title }}}</span>
                     <div class="clearfix"></div>
                 </div>
@@ -106,12 +112,10 @@
                 <div class="row post-actions-container">
                         <div class="col-md-12">
                             <div class="pull-right post-actions">
-                                <?php // TODO: Write report buttons + backend ?>
+                                <?php // TODO: Write report buttons + backend  + close, sticky buttons ?>
 
-
-
-                                    <a class="btn btn-primary btn-sm" href="/topic/edit/{{{$topic->id}}}">edit</a>
-                                    <a class="btn btn-primary btn-sm" href="/topic/delete/{{{$topic->id}}}">delete</a>
+                                    <a class="btn btn-primary btn-sm" href="{{{ action('TopicController@getEdit', $topic->id) }}}">edit</a>
+                                    <a class="btn btn-primary btn-sm" href="{{{ action('TopicController@getDelete', $topic->id) }}}">delete</a>
 
                             </div>
                         </div>
@@ -151,7 +155,7 @@
             </div>
 
 
-            <h5><a class="forum-link" href="/user/profile/{{{$reply->user->id}}}">{{{ $reply->user->username }}}</a></h5>
+            <h5><a class="forum-link" href="{{{ action('UserController@getProfile', $reply->user->id) }}}">{{{ $reply->user->username }}}</a></h5>
             <span>{{{ $reply->user->user_title }}}</span>
             <div class="clearfix"></div>
         </div>
@@ -193,8 +197,8 @@
 
                     @if(!Auth::guest())
                     @if($reply->user_id == Auth::user()->id || Auth::user()->canModifyPost($reply) )
-                    <a class="btn btn-primary btn-sm" href="/reply/edit/{{{$reply->id}}}">edit</a>
-                    <a class="btn btn-primary btn-sm" href="/reply/delete/{{{$reply->id}}}">delete</a>
+                    <a class="btn btn-primary btn-sm" href="{{{ action('ReplyController@getEdit', $reply->id) }}}">edit</a>
+                    <a class="btn btn-primary btn-sm" href="{{{ action('ReplyController@getDelete', $reply->id) }}}">delete</a>
                     @endif
                     @endif
                     <a class="btn btn-primary btn-sm quoteBtn" data-reply-id="{{{$reply->id}}}">quote</a>
@@ -209,28 +213,30 @@
 {{ $replies->links() }}
 
 
-<div>
+@if(!$topic->closed)
+    <div class="replyZone">
 
-    {{ Form::open(array('action' => array('TopicController@postReply', $topic->id))) }}
+        {{ Form::open(array('action' => array('ReplyController@postNew', $topic->id))) }}
 
 
 
-    {{-- The textarea gets its markup and actions from jquery.bbcode.js, located in the assets/js/ folder --}}
+        {{-- The textarea gets its markup and actions from jquery.bbcode.js, located in the assets/js/ folder --}}
 
-    {{ Form::textarea('replyBody', (Session::has('postReplyBody')) ? Session::get('postReplyBody') : '', array('class' => 'form-control', 'id' => 'replyArea')) }}
-    <script>$('#replyArea').bbcode();</script>
-    <br/>
-    @if(Session::has('postReplyError'))
+        {{ Form::textarea('replyBody', (Session::has('postReplyBody')) ? Session::get('postReplyBody') : '', array('class' => 'form-control', 'id' => 'replyArea')) }}
+        <script>$('#replyArea').bbcode();</script>
+        <br/>
+        @if(Session::has('postReplyError'))
 
-    <p class="alert alert-danger">
-        {{{ Session::get('postReplyError') }}}
-    </p>
-    @endif
+        <p class="alert alert-danger">
+            {{{ Session::get('postReplyError') }}}
+        </p>
+        @endif
 
-    {{ Form::submit('Post reply', array('id' => 'postBtn', 'class' => 'btn btn-primary')) }}
-    {{ Form::close() }}
-</div>
+        {{ Form::submit('Post reply', array('id' => 'postBtn', 'class' => 'btn btn-primary')) }}
+        {{ Form::close() }}
+    </div>
 
+@endif
 
 
 

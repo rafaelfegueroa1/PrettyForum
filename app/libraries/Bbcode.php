@@ -92,7 +92,7 @@ class BbCode {
         // Todo: Give images classes with max size of x * x
         // Replace [img]...[/img] with <img src="..."/>
         $this->bbcode_table["/\[img\](.*?)\[\/img\]/is"] = function ($match) {
-            return "<img src=\"$match[1]\"/>";
+            return "<img class='image' src=\"$match[1]\"/>";
         };
 
 
@@ -124,18 +124,21 @@ class BbCode {
     // Also replaces nested quotes
     public function quote($str)
     {
-        while(preg_match("/\[quote=(.*?)\](.*?)\[\/quote\]/", $str))
+
+        // While there are matches, replace them
+        // Recursive pattern
+        while(preg_match("/\[quote=(.*?)\](((?R)|.*?)+)\[\/quote\]/is", $str) == true)
         {
-            $str = preg_replace_callback("/\[quote=(.*?)\](.*?)\[\/quote\]/", function ($match) {
+            $str = preg_replace_callback("/\[quote=(.*?)\](((?R)|.*?)+)\[\/quote\]/is", function ($match) {
                 $match[2] = preg_replace("/\[img\](.*?)\[\/img\]/is", "<a class='forum-link' href='$1' target='_blank'>[ Image ]</a>", $match[2]);
-                return "<div><span class='forum-link'>".$match[1]."</span> <blockquote><p>$match[2]</p></blockquote></div>";
+                return "<div class='quote'><span class='forum-link'>".$match[1]."</span> <blockquote><p>$match[2]</p></blockquote></div>";
             }, $str);
         }
-        while(preg_match("/\[quote\](.*?)\[\/quote\]/is", $str))
+        while(preg_match("/\[quote\](((?R)|.*?)+)\[\/quote\]/is", $str) == true)
         {
-            $str = preg_replace_callback("/\[quote\](.*?)\[\/quote\]/is", function ($match) {
+            $str = preg_replace_callback("/\[quote\](((?R)|.*?)+)\[\/quote\]/is", function ($match) {
                 $match[1] = preg_replace("/\[img\](.*?)\[\/img\]/is", "<a class='forum-link' href='$1' target='_blank'>[ Image ]</a>", $match[1]);
-                return "<div><span class='forum-link'>Quote</span> <blockquote><p>$match[1]</p></blockquote></div>";
+                return "<div class='quote'><span class='forum-link'>Quote</span> <blockquote><p>$match[1]</p></blockquote></div>";
             }, $str);
         }
         return $str;

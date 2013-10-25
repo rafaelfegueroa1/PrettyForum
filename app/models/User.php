@@ -30,11 +30,16 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         return $this->hasMany('Reply', 'user_id');
     }
 
+    public function logins()
+    {
+        return $this->hasMany('Loginlogger', 'user_id');
+    }
+
 
     // Return user's postcount
     public function getPostCount()
     {
-        return $this->topics()->where('deleted', '=', '0')->count() + $this->replies()->where('deleted', '=', '0')->count();
+        return $this->topics()->count() + $this->replies()->count();
     }
 
     // Check if user can modify this post
@@ -43,6 +48,9 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         // ToDo: Write function to check if user can modify post
         // Check for certain groups user belongs to, is admin, is mod etc
     }
+
+
+
 
 
 	/**

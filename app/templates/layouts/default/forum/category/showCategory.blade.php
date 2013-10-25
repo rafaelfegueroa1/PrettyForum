@@ -16,6 +16,11 @@
     </ul>
 
 
+<div class="row">
+    <div class="pull-right">
+        <a class="btn btn-primary btn-sm" href="{{{ action('TopicController@getNew', $category->id) }}}">New topic</a>
+    </div>
+</div>
 <table class="table-container">
 
     <thead class="table-head">
@@ -51,7 +56,7 @@
         </td>
 
         <td class="category-info col-md-2">
-            {{{ $topic->replies()->where('deleted', '=', '0')->count() }}}
+            {{{ $topic->replies()->count() }}}
         </td>
         <td class="category-info col-md-4">
 
@@ -62,7 +67,7 @@
 
             @else
             {{-- Replies found, echo it's info --}}
-            <?php   $reply = $topic->replies()->where('deleted', '=', '0')->orderBy('id', 'DESC')->first();
+            <?php   $reply = $topic->replies()->orderBy('id', 'DESC')->first();
             $user = $reply->user;
             ?>
 

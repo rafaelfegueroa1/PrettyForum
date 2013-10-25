@@ -12,7 +12,7 @@ class TopicController extends BaseController {
     {
         $this->beforeFilter('auth', array('except' => array('getShow')));
 
-        $this->beforeFilter('csrf', array('except' => array('getShow', 'getReplyText')));
+        $this->beforeFilter('csrf', array('except' => array('getShow', 'getReplyText', 'getEdit', 'getDelete', 'getNew')));
     }
 
     // Find and return view of topic
@@ -20,77 +20,171 @@ class TopicController extends BaseController {
     {
         $topic = Topic::find($id);
 
-
         // If there's no topic ID or ID is invalid return an error view
         if(is_null($topic)) return View::make('layouts.error.standardError')
             ->with('error', 'Topic not found');
 
         // Where deleted to hide "deleted" replies
-        $replies = $topic->replies()->where('deleted', '=', '0')->paginate(20);
+        $replies = $topic->replies()->paginate(20);
 
         return View::make('layouts.forum.topic.showTopic')
             ->with('topic', $topic)
-            ->with('replies', $replies);
+            ->with('replies', $replies)
+            ->with('bbcode', new BbCode);
     }
 
 
-    // getReplyText responds to an AJAX call that is triggered when a user hits quote on a post
-    // Returns the replies text
-    public function getReplyText($id = NULL)
+    public function getNew($id = NULL)
     {
-        if(!Request::ajax())
-        {
-            return 'Request not AJAX';
-        }
-        $reply = Reply::find($id);
-        if(is_null($reply))
-        {
-            return 'No reply with that ID';
-        }
-        return json_encode(array(
-            'id' => $reply->id,
-            'body' => $reply->body,
-            'username' => $reply->user->username
-        ));
+        $category = Category::find($id);
+        // If there's no reply ID or ID is invalid return an error view
+        if(is_null($category)) return View::make('layouts.error.standardError')
+            ->with('error', 'Category not found.');
+
+
+        return View::make('layouts.forum.topic.newTopic')
+            ->with('category', $category);
     }
 
-
-    // Post a reply to a topic, defined by ID
-    public function postReply($id = NULL)
+    public function postNew($id = NULL)
     {
-        $topic = Topic::find($id);
+        if(Auth::user()->topics()->count() > 0)
+        {
+            $timeDifference = (strtotime(Auth::user()->topics()->orderBy('id', 'DESC')->first()->created_at) + 30) - time();
+            if($timeDifference > 0)
+            {
+                Session::flash('postTopicError', 'Please wait '.$timeDifference.' seconds before posting.');
+                Input::flash();
+                return Redirect::action('TopicController@getNew', $id);
+            }
+        }
 
-        // TODO: Make double post edit last post
-
-        if(is_null($topic))
+        $category = Category::find($id);
+        if(is_null($category))
         {
             return View::make('layouts.error.standardError')
-                ->with('error', 'Topic not found');
+                ->with('error', 'Category not found');
         }
         $data = Input::get();
 
-        // Make a validator to check if the post can be posted
+        // Make a validator to check if the topic can be posted
         $validator = Validator::make(
             $data,
-            array('replyBody' => 'required|min:15')
+            array(
+                'topicTitle' => 'required|min:5',
+                'topicBody' => 'required|min:15'
+            )
         );
-        // Validator fails? Return with error and the body of the reply
+        // Validator fails? Return with error and the body of the topic
         if($validator->fails())
         {
-            Session::flash('postReplyError', 'Your reply has to be at least 15 characters long.');
-            Session::flash('postReplyBody', $data['replyBody']);
-            return Redirect::action('TopicController@getShow', array($id));
+            Session::flash('postTopicError', 'Your topic has to be at least 15 characters long.');
+            Input::flash();
+            return Redirect::action('TopicController@getNew', $id);
         }
 
-        $reply = new Reply;
-        $reply->body = $data['replyBody'];
-        $reply->topic_id = $topic->id;
-        $reply->user_id = Auth::user()->id;
-        $reply->category_id = $topic->category_id;
-        $reply->save();
+        // Create new topic object and save it with the just posted contents
+        $topic = new Topic;
+        $topic->title = $data['topicTitle'];
+        $topic->body = $data['topicBody'];
+        $topic->user_id = Auth::user()->id;
+        $topic->category_id = $category->id;
+        $topic->save();
 
-        return Redirect::to('/topic/show/'.$topic->id.'#'.$reply->id);
+        return Redirect::action('TopicController@getShow', $topic->id);
+    }
 
+    public function getEdit($id = NULL)
+    {
+        $topic = Topic::find($id);
+        // If there's no reply ID or ID is invalid return an error view
+        if(is_null($topic)) return View::make('layouts.error.standardError')
+            ->with('error', 'Topic not found.');
+
+        if($topic->user_id != Auth::user()->id && !Auth::user()->canModifyPost())
+        {
+            return View::make('layouts.error.standardError')
+                ->with('error', 'You cannot edit this topic.');
+        }
+
+        return View::make('layouts.forum.topic.editTopic')
+            ->with('topic', $topic);
+
+
+    }
+
+    public function postEdit($id = NULL)
+    {
+        $topic = Topic::find($id);
+        // If there's no topic ID or ID is invalid return an error view
+        if(is_null($topic)) return View::make('layouts.error.standardError')
+            ->with('error', 'Reply not found.');
+
+        if($topic->user_id != Auth::user()->id && !Auth::user()->canModifyPost())
+        {
+            return View::make('layouts.error.standardError')
+                ->with('error', 'You cannot edit this topic.');
+        }
+
+        $data = Input::get();
+
+        // Make a validator to check if the post can be edited
+        $validator = Validator::make(
+            $data,
+            array(
+                'topicTitle' => 'required|min:5',
+                'topicBody' => 'required|min:15'
+            )
+        );
+        // Validator fails? Return with error and the body of the topic
+        if($validator->fails())
+        {
+            Session::flash('editTopicError', 'Your topic body has to be at least 15 characters long.');
+            Input::flash();
+            return Redirect::action('TopicController@getEdit', $id);
+        };
+
+
+        $topic->title = $data['topicTitle'];
+        $topic->body = $data['topicBody'];
+        $topic->save();
+
+        return Redirect::action('TopicController@getShow', $topic->id);
+    }
+
+    public function getDelete($id = NULL)
+    {
+        $topic = Topic::find($id);
+        // If there's no topic ID or ID is invalid return an error view
+        if(is_null($topic)) return View::make('layouts.error.standardError')
+            ->with('error', 'Topic not found.');
+
+        if($topic->user_id != Auth::user()->id && !Auth::user()->canModifyPost())
+        {
+            return View::make('layouts.error.standardError')
+                ->with('error', 'You cannot delete this topic.');
+        }
+
+        return View::make('layouts.forum.topic.deleteTopic')
+            ->with('topic', $topic)
+            ->with('bbcode', new BbCode);
+    }
+
+    public function postDelete($id = NULL)
+    {
+        $topic = Topic::find($id);
+        // If there's no topic ID or ID is invalid return an error view
+        if(is_null($topic)) return View::make('layouts.error.standardError')
+            ->with('error', 'Topic not found.');
+
+        if($topic->user_id != Auth::user()->id && !Auth::user()->canModifyPost())
+        {
+            return View::make('layouts.error.standardError')
+                ->with('error', 'You cannot delete this topic.');
+        }
+
+        $topic->delete();
+        return Redirect::action('ForumController@getShow', $topic->category_id);
     }
 
 }

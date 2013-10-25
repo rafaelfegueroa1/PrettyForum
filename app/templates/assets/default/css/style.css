@@ -209,11 +209,28 @@
     padding: 10px 15px 0px 0px;
 }
 
+.replyZone
+{
+    margin-top:50px;
+}
+
 .avatar
 {
     max-width:100px;
     max-height: 100px;
 }
+
+.image
+{
+    width:100%;
+    max-width:500px;
+}
+
+.quote
+{
+    margin-bottom:-30px;
+}
+
 
 
 /* Override Bootstrap's BBCode used elements */
@@ -226,6 +243,12 @@ blockquote {
     padding: 7px 15px 0px;
     margin: 0 0 21px;
     border-left: 5px solid #bbbfc0;
+}
+
+pre {
+    display: block;
+    padding: 5px;
+
 }
 
 /* Spoiler container */
@@ -302,7 +325,7 @@ blockquote {
 /* BBcode / Textarea */
 
 .bbcode-editor {
-    margin-top:50px;
+    margin-top:0px;
     width: 100%;
 }
 

@@ -143,6 +143,8 @@ class Helper {
     {
 
         // Drop tables if they are already installed, drop them in this order to make sure no foreign key constraints errors will be triggered
+        Schema::dropIfExists('user_logins');
+
         Schema::dropIfExists('forum_replies');
         Schema::dropIfExists('forum_topics');
         Schema::dropIfExists('forum_categories');
@@ -204,8 +206,8 @@ class Helper {
             $table->foreign('category_id')->references('id')->on('forum_categories')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+            $table->boolean('sticky')->default(0);
             $table->boolean('closed')->default(0);
-            $table->boolean('deleted')->default(0);
 
             $table->timestamps();
 
@@ -228,13 +230,21 @@ class Helper {
             $table->foreign('category_id')->references('category_id')->on('forum_topics')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->boolean('deleted')->default(0);
 
             $table->timestamps();
         });
 
-        // Todo: create table to track user logins + their IPs
+        Schema::create('user_logins', function($table)
+        {
+            $table->increments('id');
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->string('ip_address');
 
+            $table->timestamps();
+        });
     }
 
     // Fill the created tables with the input from the installer page

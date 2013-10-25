@@ -34,14 +34,14 @@
             <p class='category-description'>{{{ $category->description }}}</p>
         </td>
         <td class="category-info col-md-1">
-            {{{ $topicCount = $category->topics()->where('deleted', '=', '0')->count() }}}
+            {{{ $topicCount = $category->topics()->count() }}}
         </td>
         <td class="category-info col-md-1">
-            {{{ $topicCount + $category->replies()->where('deleted', '=', '0')->count() }}}
+            {{{ $topicCount + $category->replies()->count() }}}
         </td>
         <td class="category-info col-md-4">
             {{-- Check if category has topics/replies --}}
-            @if( $category->replies()->where('deleted', '=', '0')->count() == 0)
+            @if( $category->replies()->count() == 0)
 
                 {{-- If category has no active topics with replies check for topics --}}
                 @if( count($category->topics) == 0)
@@ -50,7 +50,7 @@
                 @else
                     {{-- Topic found, echo it's info --}}
                     <?php
-                    $topic = $category->topics()->where('deleted', '=', '0')->orderBy('id', 'DESC')->first();
+                    $topic = $category->topics()->orderBy('id', 'DESC')->first();
                     $user = $topic->user;
                     ?>
 
@@ -61,7 +61,7 @@
 
             @else
             {{-- Active topic found, echo it's info --}}
-            <?php   $reply = $category->replies()->where('deleted', '=', '0')->orderBy('id', 'DESC')->first();
+            <?php   $reply = $category->replies()->orderBy('id', 'DESC')->first();
             $topic = $reply->topic()->first();
             $user = $reply->user;
             ?>

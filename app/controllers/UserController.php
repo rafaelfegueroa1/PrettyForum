@@ -45,8 +45,17 @@ class UserController extends BaseController {
             (isset($data['remember'])) ? true : false
             ))
         {
+            // Log the IP address that just logged onto this account
+            $loginLogger = new Loginlogger;
+            $loginLogger->user_id = Auth::user()->id;
+            $loginLogger->ip_address = Request::server('REMOTE_ADDR');
+            $loginLogger->save();
+
             return Redirect::to('/');
         }
+
+
+
 
         Input::flashOnly('username');
         Session::flash('loginError', 'Username or password is incorrect.');
@@ -65,7 +74,7 @@ class UserController extends BaseController {
             'username' => 'required|min:3|max:25|unique:users|alpha_dash|',
             'password' => 'required|min:5',
             'passwordConfirm' => 'required|same:password',
-            'email' => 'required|email|max:60'
+            'email' => 'required|email|max:60|unique:users'
         );
         $messages = array(
             'passwordConfirm.same' => 'Passwords do no match.',
@@ -101,6 +110,13 @@ class UserController extends BaseController {
     {
         Auth::logout();
         return Redirect::to('/');
+    }
+
+
+
+    public function getProfile($id = NULL)
+    {
+
     }
 
 }
