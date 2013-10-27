@@ -18,6 +18,6 @@ class AdminController extends BaseController {
                     ->with('error', 'You do not have sufficient rights to visit this page.');
             }
         });
-    }
+}
 
 }
