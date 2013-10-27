@@ -30,7 +30,7 @@ class TopicController extends BaseController {
         return View::make('layouts.forum.topic.showTopic')
             ->with('topic', $topic)
             ->with('replies', $replies)
-            ->with('bbcode', new BbCode);
+            ->with('bbcode', new Bbcode);
     }
 
 
@@ -167,7 +167,7 @@ class TopicController extends BaseController {
 
         return View::make('layouts.forum.topic.deleteTopic')
             ->with('topic', $topic)
-            ->with('bbcode', new BbCode);
+            ->with('bbcode', new Bbcode);
     }
 
     public function postDelete($id = NULL)
