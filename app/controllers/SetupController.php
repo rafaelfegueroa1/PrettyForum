@@ -81,10 +81,9 @@ class SetupController extends BaseController {
         Config::set('database.connections.mysql.username', $input['databaseUsername']);
         Config::set('database.connections.mysql.password', $input['databasePassword']);
 
-        // Copy default views to views/views folder
-        Helper::copyFilesRecursively(Helper::TEMPLATESFOLDER.'/layouts/default', Helper::VIEWSFOLDER);
-        // Copy default assets to public/assets
-        Helper::copyFilesRecursively(Helper::TEMPLATESFOLDER.'/assets/default', Helper::PUBLICFOLDER.'/assets');
+
+        // Install default template
+        Helper::installTemplate('default');
 
 
         // Create all necessary tables

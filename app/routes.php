@@ -13,12 +13,14 @@
 
 Route::controller('setup', 'SetupController');
 Route::controller('user', 'UserController');
-
+Route::controller('admin', 'AdminController');
 
 
 Route::controller('forum', 'ForumController');
 Route::controller('topic', 'TopicController');
 Route::controller('reply', 'ReplyController');
+
+
 
 
 Route::get('/', function()

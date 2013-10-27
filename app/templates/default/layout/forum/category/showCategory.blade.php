@@ -16,11 +16,13 @@
     </ul>
 
 
+@if(Auth::check())
 <div class="row">
     <div class="pull-right">
         <a class="btn btn-primary btn-sm" href="{{{ action('TopicController@getNew', $category->id) }}}">New topic</a>
     </div>
 </div>
+@endif
 <table class="table-container">
 
     <thead class="table-head">

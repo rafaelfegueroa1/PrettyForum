@@ -14,6 +14,13 @@ class Helper {
     const TEMPLATESFOLDER = '../app/templates/';
     const PUBLICFOLDER = '../public';
 
+
+
+    public static function readSettingsIni()
+    {
+        return parse_ini_file(self::SETTINGSFILE, true);
+    }
+
     // Function to write an ini file
     public static function writeIni($fileName, $iniArray)
     {
@@ -103,6 +110,27 @@ class Helper {
     }
 
 
+
+    // Helper to install templates
+    public static function installTemplate($name)
+    {
+        // Remove files first
+        Helper::deleteFolderAndContents(Helper::VIEWSFOLDER);
+        Helper::deleteFolderAndContents(Helper::PUBLICFOLDER.'/assets');
+
+        // Copy views to views/views folder
+        Helper::copyFilesRecursively(self::TEMPLATESFOLDER.'/'.$name.'/layout', self::VIEWSFOLDER);
+        // Copy assets to public/assets
+        Helper::copyFilesRecursively(self::TEMPLATESFOLDER.'/'.$name.'/assets', self::PUBLICFOLDER.'/assets');
+
+        $settings = self::readSettingsIni();
+        $settings['appSettings']['template'] = $name;
+        self::writeIni(self::SETTINGSFILE, $settings);
+    }
+
+
+
+
     // Shorten given string to $maxLength
     public static function shorten($string, $maxLength = 25)
     {
@@ -136,6 +164,10 @@ class Helper {
 
 
     // Install helper section
+
+
+
+
 
     // Create all tables necessary for PrettyForum to run
     // All built with Laravel's Schema builder

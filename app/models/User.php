@@ -49,6 +49,17 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
         // Check for certain groups user belongs to, is admin, is mod etc
     }
 
+    // Todo: write inside checks for admin menu
+    // Check if user can access admin menu
+    public function canAccessAdminMenu()
+    {
+        if($this->username == 'Admin')
+        {
+            return true;
+        }
+        return false;
+    }
+
 
 
 

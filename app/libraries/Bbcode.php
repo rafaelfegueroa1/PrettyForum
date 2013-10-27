@@ -8,7 +8,7 @@
  */
 
 
-class BbCode {
+class Bbcode {
     protected $bbcode_table = array();
 
     public function __construct () {

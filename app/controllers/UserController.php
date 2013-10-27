@@ -14,7 +14,7 @@ class UserController extends BaseController {
     {
         $this->beforeFilter('guest', array('only' => array('getLogin', 'postLogin', 'getRegister', 'postRegister')));
         $this->beforeFilter('auth', array('only' => array('getLogout')));
-        $this->beforeFilter('csrf', array('except' => array('getIndex', 'getLogin', 'getRegister')));
+        $this->beforeFilter('csrf', array('except' => array('getIndex', 'getLogin', 'getRegister', 'getProfile')));
     }
 
 
@@ -116,6 +116,11 @@ class UserController extends BaseController {
 
     public function getProfile($id = NULL)
     {
+        // Todo: user profile
+        $user = User::find($id);
+        // If there's no user ID or ID is invalid return an error view
+        if(is_null($user)) return View::make('layouts.error.standardError')
+            ->with('error', 'User not found.');
 
     }
 
