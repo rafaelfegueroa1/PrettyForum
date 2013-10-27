@@ -118,6 +118,15 @@ class Helper {
         Helper::deleteFolderAndContents(Helper::VIEWSFOLDER);
         Helper::deleteFolderAndContents(Helper::PUBLICFOLDER.'/assets');
 
+        if(!file_exists(self::VIEWSFOLDER))
+        {
+            mkdir(self::VIEWSFOLDER, 0777);
+        }
+        if(!file_exists(self::PUBLICFOLDER.'/assets'))
+        {
+            mkdir(self::PUBLICFOLDER.'/assets', 0777);
+        }
+
         // Copy views to views/views folder
         Helper::copyFilesRecursively(self::TEMPLATESFOLDER.'/'.$name.'/layout', self::VIEWSFOLDER);
         // Copy assets to public/assets
